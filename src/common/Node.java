@@ -14,6 +14,7 @@ public class Node
   int costSoFar;
   int edit;
   int length;
+  int priority;
 
   public Node(String name)
   {
@@ -23,14 +24,7 @@ public class Node
     this.costSoFar = 0;
     this.edit = 0;
     this.length = name.length();
-  }
-
-  public Node(String name, boolean visited, int costSoFar, int edit)
-  {
-    this.name = name;
-    this.visited = visited;
-    this.costSoFar = costSoFar;
-    this.edit = edit;
+    this.priority = 0;
   }
 
   public void setName(String name)
