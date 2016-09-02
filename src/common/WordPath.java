@@ -16,7 +16,9 @@ public class WordPath
   public static ArrayList<String> dictionaryList;
   private static List<List<Node>> edgeList = new ArrayList<>();
   //private static List<Node>[] edgeList = new ArrayList<>[MAX_LEN+1]();
-  //static final long startTime = System.currentTimeMillis();
+  static final long startTime = System.currentTimeMillis();
+  static Node startNode;
+  static Node goalNode;
 
 	public static void main(String[] args)
 	{
@@ -26,22 +28,21 @@ public class WordPath
 
 	       //String path = new File("alkjsdfla").getAbsolutePath();
 	       //System.out.println(path);
-		checkInput(args);
     buildGraphList();
+		checkInput(args);
     createGraph(args);
 	}
 
-  public static ArrayList<Node> algorithm(Node startNode, Node
-          goalNode)
+  public static ArrayList<Node> algorithm(Node startNode, Node goalNode)
   {
-    ArrayList<Node> path = new ArrayList<Node>();
+    ArrayList<Node> path = new ArrayList<>();
     int priority = 0;
     int new_cost = 0;
     Astar_Comparator comparator = new Astar_Comparator();
-    PriorityQueue<Astar_Elements> frontier = new PriorityQueue<Astar_Elements>(20, comparator);
+    PriorityQueue<Astar_Elements> frontier = new PriorityQueue<>(20, comparator);
     frontier.add(new Astar_Elements(startNode, 0));
     HashMap<Node, Node> came_from = new HashMap<>();
-    HashMap<Node, Integer> cost_so_far = new HashMap<Node, Integer>();
+    HashMap<Node, Integer> cost_so_far = new HashMap<>();
     Node current = null;
     String lastVisited = null;
 
@@ -95,8 +96,13 @@ public class WordPath
       System.out.print(p.name);
       System.out.print(" ");
     }
-    System.out.print(goalNode.name);
+    System.out.println(goalNode.name);
 
+    long endTime = System.currentTimeMillis();
+    long totalTime = endTime - startTime;
+    System.out.println(TimeUnit.MILLISECONDS.toMinutes(totalTime));
+    System.out.println(TimeUnit.MILLISECONDS.toSeconds(totalTime));
+    System.out.println(totalTime);
     return path;
   }
 
@@ -177,9 +183,28 @@ public class WordPath
 
   private static void createGraph(String[] args)
   {
-    Node startNode = null;
-    Node goalNode = null;
+    //arrayList = edgeList.get(length-1);
+    List<Node> sublist;
 
+    for (List<Node> array : edgeList)
+    {
+      int i = 0;
+      for (Node node : array)
+      //for (int i = 0; i < array.size(); i++)
+      {
+        sublist = array.subList(i, array.size());
+        modificationChecks(node, sublist);
+        if (node.length < 12)
+        {
+          sublist = edgeList.get(node.length);
+          modificationChecks(node, sublist);
+        }
+        //modificationChecks(node, 1, 1);
+        //modificationChecks(node, 1, 0);
+        i++;
+      }
+    }
+    /*
     for (String s : dictionaryList)
     {
       Node newNode = new Node(s);
@@ -200,6 +225,7 @@ public class WordPath
         goalNode = newNode;
       }
     }
+    */
     /*
     final long endTime = System.currentTimeMillis();
     long totalTime = endTime - startTime;
@@ -211,29 +237,40 @@ public class WordPath
     Collection path = algorithm(startNode, goalNode);
   }
 
-  private static void modificationChecks(Node node, int failsAllowed, int arrayIndex)
+  private static void modificationChecks(Node node, List<Node> arrayList)
   {
     int matches;
+    int numFails;
+    int failsAllowed = 1;
     int length = node.length;
     Node largerNode;
     Node smallerNode;
-    List<Node> arrayList;
+    //List<Node> arrayList;
     //arrayList = edgeList.get(length-1);
+    /*
     if (length-arrayIndex < 0 || length-arrayIndex > 11)
     {
       return;
     }
     arrayList = edgeList.get(length-arrayIndex);
-    int numFails;
+    */
+
+
 
     for (Node n : arrayList)
     {
+      if (n.name.equals(node.name))
+      {
+        return;
+      }
       numFails = 0;
       matches = 0;
 
       if (n.length == node.length)
       {
-        for (int i = 0; i < length; i++)
+        //for (int i = 0; i < length; i++)
+        int i = 0;
+        while (i != n.length && numFails <= failsAllowed)
         {
           if (n.name.charAt(i) != node.name.charAt(i))
           {
@@ -243,6 +280,7 @@ public class WordPath
           {
             matches++;
           }
+          i++;
         }
 
       }
@@ -279,55 +317,12 @@ public class WordPath
         }
       }
 
-      /*
-      else if (n.length < node.length)
-      {
-        int j = 0;
-        int i = 0;
-
-        while (j != n.length && i != node.length)
-        {
-          if (n.name.charAt(j) != node.name.charAt(i))
-          {
-            i++;
-            numFails++;
-          }
-          else
-          {
-            i++;
-            j++;
-            matches++;
-          }
-        }
-      }
-      else if (n.length > node.length)
-      {
-        int j = 0;
-        int i = 0;
-
-        while (i != n.length && j != node.length)
-        {
-          if (n.name.charAt(i) != node.name.charAt(j))
-          {
-            i++;
-            numFails++;
-          }
-          else
-          {
-            j++;
-            i++;
-          }
-        }
-      }
-      */
-
       if (numFails <= failsAllowed && matches >= 1)
       {
         node.addNeighbor(n);
         n.addNeighbor(node);
       }
     }
-
     //System.out.println(node.name);
   }
 
@@ -404,8 +399,8 @@ public class WordPath
 		if (DEBUG)
 		{
 			//fileName = "src/data/test.txt";
-      fileName = "src/data/example.txt";
-      //fileName = "src/data/OpenEnglishWordList.txt";
+      //fileName = "src/data/example.txt";
+      fileName = "src/data/OpenEnglishWordList.txt";
 		}
 
 		try
@@ -418,16 +413,24 @@ public class WordPath
 
 			while ((line = bufferedReader.readLine()) != null)
 			{
-        dictionaryList.add(line);
+        // Build ArrayLists of nodes
+        Node newNode = new Node(line);
+        edgeList.get(newNode.length-1).add(newNode);
+
+        //dictionaryList.add(line);
 				if (line.equals(args[1]))
 				{
+          startNode = newNode;
 					wordOneMatch = true;
 				}
 				
 				if (line.equals(args[2]))
 				{
+          goalNode = newNode;
 					wordTwoMatch = true;
 				}
+
+
 				//System.out.println(line);
 			}
 
