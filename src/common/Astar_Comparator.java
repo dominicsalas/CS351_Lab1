@@ -3,7 +3,9 @@ package common;
 import java.util.Comparator;
 
 /**
- * Created by dsalas on 9/1/16.
+ * Dominic Salas
+ *
+ * Class used by our Astar Algo. Used to compare the priorities of our Nodes.
  */
 public class Astar_Comparator implements Comparator<Astar_Elements>
 {

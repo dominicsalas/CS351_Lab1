@@ -1,7 +1,10 @@
 package common;
 
 /**
- * Created by dsalas on 9/1/16.
+ * Dominic Salas
+ *
+ * Class used by our Astar Algo when finding the path. Probably could've used
+ * Node, however, this keeps things a little simpler.
  */
 public class Astar_Elements
 {
